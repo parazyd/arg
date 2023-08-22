@@ -75,7 +75,7 @@ impl<'a> Args<'a> {
         }
     }
 
-    pub fn parse(&mut self) {
+    pub fn parse(&mut self) -> Vec<String> {
         self.i_ = 1; // skip the program name itself
         while self.i_ < self.argv.len() {
             if self.argv[self.i_].starts_with('-') {
@@ -96,5 +96,8 @@ impl<'a> Args<'a> {
                 break;
             }
         }
+
+        // Return what's left
+        self.argv[self.i_..].to_vec()
     }
 }

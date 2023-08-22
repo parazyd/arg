@@ -17,7 +17,7 @@
 
 use super::Args;
 
-fn setup_args<'a>(args: Vec<&'a str>) -> Args<'a> {
+fn setup_args(args: Vec<&str>) -> Args<'_> {
     Args {
         argv: args.into_iter().map(String::from).collect(),
         argc_: None,
@@ -56,6 +56,7 @@ fn eargf_working() {
 #[should_panic]
 fn eargf_panic() {
     let mut args = setup_args(vec!["program", "-a", "-b"]).with_cb(|args, flag| match flag {
+        'a' => {}
         'b' => {
             let _ = args.eargf().to_string();
         }
@@ -112,4 +113,35 @@ fn argf_none() {
     assert!(aflag);
     assert!(bflag);
     assert_eq!(bvalue, None);
+}
+
+#[test]
+fn remaining() {
+    let mut aflag = false;
+    let mut bflag = false;
+    let mut bvalue = None;
+    let remaining;
+
+    {
+        let mut args =
+            setup_args(vec!["program", "-a", "-b", "value", "imhere"]).with_cb(|args, flag| {
+                match flag {
+                    'a' => aflag = true,
+                    'b' => {
+                        bflag = true;
+                        bvalue = args.argf().map(String::from);
+                    }
+                    _ => { /* Usually usage() */ }
+                }
+            });
+
+        remaining = args.parse();
+    }
+
+    assert!(aflag);
+    assert!(bflag);
+    assert_eq!(bvalue, Some("value".to_string()));
+
+    assert!(remaining.len() == 1);
+    assert!(remaining[0] == "imhere")
 }
