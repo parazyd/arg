@@ -21,6 +21,7 @@ mod tests;
 #[allow(clippy::type_complexity)]
 pub struct Args<'a> {
     argv: Vec<String>,
+    argv0: String,
     argc_: Option<char>,
     i_: usize,
     brk_: bool,
@@ -30,13 +31,21 @@ pub struct Args<'a> {
 impl<'a> Args<'a> {
     #[allow(clippy::new_without_default)]
     pub fn new() -> Args<'a> {
-        Args {
+        let mut args = Args {
             argv: std::env::args().collect(),
+            argv0: String::new(),
             argc_: None,
             i_: 0,
             brk_: false,
             callback: None,
-        }
+        };
+
+        args.argv0 = args.argv[0].clone();
+        args
+    }
+
+    pub fn argv0(&self) -> String {
+        self.argv0.clone()
     }
 
     pub fn with_cb<C>(mut self, cb: C) -> Self

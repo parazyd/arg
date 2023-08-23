@@ -18,13 +18,17 @@
 use super::Args;
 
 fn setup_args(args: Vec<&str>) -> Args<'_> {
-    Args {
+    let mut args = Args {
         argv: args.into_iter().map(String::from).collect(),
+        argv0: String::new(),
         argc_: None,
         i_: 0,
         brk_: false,
         callback: None,
-    }
+    };
+
+    args.argv0 = args.argv[0].clone();
+    args
 }
 
 #[test]
@@ -144,4 +148,17 @@ fn remaining() {
 
     assert!(remaining.len() == 1);
     assert!(remaining[0] == "imhere")
+}
+
+#[test]
+fn empty() {
+    let mut args = setup_args(vec!["program"]).with_cb(|_args, flag| match flag {
+        'a' => {}
+        'b' => {}
+        _ => {}
+    });
+
+    let remaining = args.parse();
+    assert!(remaining.is_empty());
+    assert!(args.argv0() == "program");
 }
