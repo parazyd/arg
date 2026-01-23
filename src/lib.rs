@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 parazyd <parazyd@dyne.org>
+ * Copyright (C) 2026 parazyd <parazyd@dyne.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -88,18 +88,22 @@ impl<'a> Args<'a> {
         self.i_ = 1; // skip the program name itself
         while self.i_ < self.argv.len() {
             if self.argv[self.i_].starts_with('-') {
-                self.argc_ = self.argv[self.i_].chars().nth(1);
-                if let Some(flag) = self.argc_ {
+                let arg = self.argv[self.i_].clone();
+                for c in arg.chars().skip(1) {
+                    self.argc_ = Some(c);
                     if let Some(mut cb) = self.callback.take() {
-                        cb(self, flag);
+                        cb(self, c);
                         self.callback = Some(cb); // restore the callback after using it
                     }
                     if self.brk_ {
-                        self.brk_ = false;
-                        self.i_ += 2; // skip the flag and its value
-                    } else {
-                        self.i_ += 1;
+                        break;
                     }
+                }
+                if self.brk_ {
+                    self.brk_ = false;
+                    self.i_ += 2;
+                } else {
+                    self.i_ += 1;
                 }
             } else {
                 break;
